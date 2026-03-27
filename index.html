@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus - Alert & Route System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-  
+
   <style>
     :root {
       --bg-dark: #0a0a0f;
@@ -39,7 +42,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background-image: 
+      background-image:
         radial-gradient(circle at 15% 50%, rgba(77, 124, 255, 0.08), transparent 25%),
         radial-gradient(circle at 85% 30%, rgba(255, 51, 102, 0.05), transparent 25%);
     }
@@ -82,7 +85,7 @@
       font-weight: 800;
       letter-spacing: 0.5px;
     }
-    
+
     .logo-text span {
       color: var(--accent);
     }
@@ -110,9 +113,17 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(0, 230, 153, 0.7); }
-      70% { box-shadow: 0 0 0 6px rgba(0, 230, 153, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(0, 230, 153, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 230, 153, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(0, 230, 153, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 230, 153, 0);
+      }
     }
 
     /* Main Container */
@@ -165,7 +176,8 @@
       transition: 0.2s;
     }
 
-    .filter-btn.active, .filter-btn:hover {
+    .filter-btn.active,
+    .filter-btn:hover {
       background: var(--accent);
       color: white;
       border-color: var(--accent);
@@ -183,6 +195,7 @@
     .alerts-container::-webkit-scrollbar {
       width: 6px;
     }
+
     .alerts-container::-webkit-scrollbar-thumb {
       background: var(--panel-border);
       border-radius: 3px;
@@ -214,9 +227,17 @@
       background: var(--alert-color, var(--accent));
     }
 
-    .alert-card.critical { --alert-color: var(--alert-critical); }
-    .alert-card.warning { --alert-color: var(--alert-warning); }
-    .alert-card.info { --alert-color: var(--alert-info); }
+    .alert-card.critical {
+      --alert-color: var(--alert-critical);
+    }
+
+    .alert-card.warning {
+      --alert-color: var(--alert-warning);
+    }
+
+    .alert-card.info {
+      --alert-color: var(--alert-info);
+    }
 
     .alert-header {
       display: flex;
@@ -253,7 +274,7 @@
       line-height: 1.4;
       margin-bottom: 1rem;
     }
-    
+
     .alert-action {
       background: rgba(255, 255, 255, 0.05);
       border: none;
@@ -266,7 +287,7 @@
       text-align: center;
       transition: 0.2s;
     }
-    
+
     .alert-action:hover {
       background: rgba(255, 255, 255, 0.1);
     }
@@ -302,15 +323,23 @@
       max-height: 60vh;
       overflow-y: auto;
     }
-    .leaflet-routing-container::-webkit-scrollbar { width: 4px; }
-    .leaflet-routing-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-    .leaflet-routing-alt, .leaflet-routing-geocoders {
+    .leaflet-routing-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .leaflet-routing-container::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .leaflet-routing-alt,
+    .leaflet-routing-geocoders {
       border-bottom: 1px solid var(--panel-border) !important;
     }
-    
+
     .leaflet-routing-geocoder input {
-      background: rgba(0,0,0,0.3) !important;
+      background: rgba(0, 0, 0, 0.3) !important;
       border: 1px solid var(--panel-border) !important;
       color: white !important;
       border-radius: 4px;
@@ -402,15 +431,23 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    
+
     .animate-fade {
       animation: fadeIn 0.4s ease forwards;
     }
   </style>
 </head>
+
 <body>
 
   <header>
@@ -430,7 +467,9 @@
       <div class="sidebar-header">
         <div class="sidebar-title">
           <span>Active Alerts</span>
-          <span style="font-size: 0.8rem; background: var(--alert-critical); padding: 2px 8px; border-radius: 12px; color: white;">3 New</span>
+          <span
+            style="font-size: 0.8rem; background: var(--alert-critical); padding: 2px 8px; border-radius: 12px; color: white;">3
+            New</span>
         </div>
         <div class="alert-filter">
           <button class="filter-btn active">All</button>
@@ -439,7 +478,7 @@
           <button class="filter-btn">Traffic</button>
         </div>
       </div>
-      
+
       <div class="alerts-container" id="alertsList">
         <!-- Rendered via JS -->
       </div>
@@ -460,7 +499,7 @@
         </div>
         <button class="route-btn" id="calculateRouteBtn">Calculate Safe Route</button>
       </div>
-      
+
       <div id="map"></div>
     </div>
   </div>
@@ -468,7 +507,7 @@
   <!-- Leaflet Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-  
+
   <script>
     // --- Mock Alert Data ---
     const alerts = [
@@ -503,16 +542,16 @@
 
     // --- Render Alerts ---
     const alertsList = document.getElementById('alertsList');
-    
+
     function renderAlerts() {
       alertsList.innerHTML = '';
       alerts.forEach((alert, index) => {
         const icon = alert.type === 'critical' ? '🚨' : alert.type === 'warning' ? '⚠️' : 'ℹ️';
-        
+
         const card = document.createElement('div');
         card.className = `alert-card ${alert.type} animate-fade`;
         card.style.animationDelay = `${index * 0.1}s`;
-        
+
         card.innerHTML = `
           <div class="alert-header">
             <div class="alert-type">${icon} ${alert.category}</div>
@@ -522,7 +561,7 @@
           <div class="alert-desc">${alert.desc}</div>
           ${alert.coords ? `<button class="alert-action" onclick="focusMap(${alert.coords[0]}, ${alert.coords[1]})">View on Map</button>` : ''}
         `;
-        
+
         alertsList.appendChild(card);
       });
     }
@@ -532,7 +571,7 @@
     // --- Map Initialization ---
     // Start at Bay Area
     const map = L.map('map', {
-        zoomControl: false // Custom placement later
+      zoomControl: false // Custom placement later
     }).setView([37.5, -122.2], 10);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -551,14 +590,14 @@
       [37.52, -122.34],
       [37.56, -122.38]
     ];
-    
+
     const riskZone = L.polygon(riskZoneCoordinates, {
       color: '#ff3366',
       fillColor: '#ff3366',
       fillOpacity: 0.2,
       dashArray: '5, 5'
     }).addTo(map);
-    
+
     riskZone.bindPopup("<b style='color:#ff3366'>High Flood Risk Area</b><br>Try to avoid routing through this zone.");
 
     // --- Routing Machine Configuration ---
@@ -566,36 +605,36 @@
     let routingControl = null;
 
     function calculateRoute() {
-        // Mock coordinates for SF to SJ for demo
-        // In a real app, you would use a geocoder (like Nominatim API) to convert text input to lat/lng
-        
-        let start = L.latLng(37.7749, -122.4194); // SF
-        let end = L.latLng(37.3382, -121.8863);   // SJ
+      // Mock coordinates for SF to SJ for demo
+      // In a real app, you would use a geocoder (like Nominatim API) to convert text input to lat/lng
 
-        if(routingControl) {
-            map.removeControl(routingControl);
+      let start = L.latLng(37.7749, -122.4194); // SF
+      let end = L.latLng(37.3382, -121.8863);   // SJ
+
+      if (routingControl) {
+        map.removeControl(routingControl);
+      }
+
+      routingControl = L.Routing.control({
+        waypoints: [start, end],
+        routeWhileDragging: true,
+        lineOptions: {
+          styles: [{ color: '#4d7cff', opacity: 0.8, weight: 6 }]
+        },
+        createMarker: function (i, waypoint, n) {
+          const markerIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: ${i === 0 ? '#00e699' : '#ff3366'}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+          return L.marker(waypoint.latLng, { icon: markerIcon });
+        },
+        showAlternatives: true,
+        altLineOptions: {
+          styles: [{ color: '#ffb833', opacity: 0.6, weight: 4 }]
         }
-
-        routingControl = L.Routing.control({
-            waypoints: [ start, end ],
-            routeWhileDragging: true,
-            lineOptions: {
-                styles: [{ color: '#4d7cff', opacity: 0.8, weight: 6 }]
-            },
-            createMarker: function(i, waypoint, n) {
-                const markerIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div style="background-color: ${i === 0 ? '#00e699' : '#ff3366'}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7]
-                });
-                return L.marker(waypoint.latLng, { icon: markerIcon });
-            },
-            showAlternatives: true,
-            altLineOptions: {
-                styles: [{color: '#ffb833', opacity: 0.6, weight: 4}]
-            }
-        }).addTo(map);
+      }).addTo(map);
     }
 
     document.getElementById('calculateRouteBtn').addEventListener('click', calculateRoute);
@@ -604,7 +643,7 @@
     setTimeout(calculateRoute, 1000);
 
     // Function to pan to alert location
-    window.focusMap = function(lat, lng) {
+    window.focusMap = function (lat, lng) {
       map.setView([lat, lng], 14, { animate: true, duration: 1.5 });
       L.popup()
         .setLatLng([lat, lng])
@@ -614,4 +653,5 @@
 
   </script>
 </body>
+
 </html>
