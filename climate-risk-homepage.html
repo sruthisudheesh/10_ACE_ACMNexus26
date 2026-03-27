@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClimateRisk — Real-Time Climate Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+   ROOT TOKENS
+───────────────────────────────────────── */
+    :root {
+      --bg: #030b15;
+      --ink: #ddeeff;
+      --muted: #4a6b8a;
+      --faint: rgba(255, 255, 255, 0.04);
+      --border: rgba(0, 180, 255, 0.12);
+      --cyan: #00d4ff;
+      --blue: #0062ff;
+      --green: #00e5a0;
+      --yellow: #ffc840;
+      --red: #ff3d6e;
+      --display: 'Bebas Neue', sans-serif;
+      --body: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────
+   ANIMATED BACKGROUND CANVAS
+───────────────────────────────────────── */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─────────────────────────────────────────
+   GRID OVERLAY
+───────────────────────────────────────── */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+    }
+
+    /* ─────────────────────────────────────────
+   NAVBAR
+───────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 60px;
+      background: rgba(3, 11, 21, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo-mark {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .nav-wordmark {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+    }
+
+    .nav-wordmark em {
+      color: var(--cyan);
+      font-style: normal;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--ink);
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .nav-cta:hover {
+      opacity: 0.85;
+    }
+
+    @media (max-width: 700px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* ─────────────────────────────────────────
+   HERO
+───────────────────────────────────────── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 2rem 80px;
+      overflow: hidden;
+    }
+
+    /* Glow blobs */
+    .hero::before,
+    .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(90px);
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .hero::before {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 98, 255, 0.18), transparent 70%);
+      top: -100px;
+      left: -100px;
+    }
+
+    .hero::after {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12), transparent 70%);
+      bottom: 0;
+      right: -80px;
+      animation-delay: -6s;
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(40px, 30px) scale(1.15);
+      }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: riseIn 0.9s var(--ease) 0.1s forwards;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--cyan);
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.2
+      }
+    }
+
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(4rem, 10vw, 9rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.6rem;
+      opacity: 0;
+      animation: riseIn 1s var(--ease) 0.25s forwards;
+    }
+
+    .hero-title .line1 {
+      display: block;
+      color: var(--ink);
+    }
+
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-title .line3 {
+      display: block;
+      color: var(--ink);
+    }
+
+    .hero-sub {
+      max-width: 560px;
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2.8rem;
+      opacity: 0;
+      animation: riseIn 1s var(--ease) 0.4s forwards;
+    }
+
+    .hero-sub strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: riseIn 1s var(--ease) 0.55s forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      color: #fff;
+      font-family: var(--body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 14px 30px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s;
+      box-shadow: 0 8px 32px rgba(0, 98, 255, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(0, 98, 255, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--faint);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(0, 212, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      animation: riseIn 1s var(--ease) 1.2s forwards;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--cyan), transparent);
+      animation: scrollPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scaleY(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scaleY(1.2);
+      }
+    }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─────────────────────────────────────────
+   STATS STRIP
+───────────────────────────────────────── */
+    .stats-strip {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 160px;
+      padding: 2rem 2.5rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-item:hover {
+      background: rgba(0, 212, 255, 0.04);
+    }
+
+    .stat-num {
+      font-family: var(--display);
+      font-size: 2.6rem;
+      letter-spacing: 0.04em;
+      color: var(--cyan);
+      display: block;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ─────────────────────────────────────────
+   FEATURES
+───────────────────────────────────────── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 2rem;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-heading {
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 5vw, 4.5rem);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-desc {
+      max-width: 520px;
+      margin: 0 auto 4rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+
+    /* Feature Cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-card {
+      background: var(--faint);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-glow, var(--cyan)), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 212, 255, 0.25);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card.large {
+      grid-column: span 2;
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .feature-card.large {
+        grid-column: span 1;
+        flex-direction: column;
+      }
+    }
+
+    .feature-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-bottom: 1.2rem;
+      background: var(--icon-bg, rgba(0, 212, 255, 0.1));
+    }
+
+    .feature-card.large .feature-icon-wrap {
+      margin-bottom: 0;
+    }
+
+    .feature-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--card-glow, var(--cyan));
+      margin-bottom: 8px;
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ─────────────────────────────────────────
+   RISK INDICATOR PREVIEW
+───────────────────────────────────────── */
+    .preview-section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 2rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .preview-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-text .section-label,
+    .preview-text .section-heading,
+    .preview-text .section-desc {
+      text-align: left;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .preview-text .section-heading {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+    }
+
+    .preview-text .section-desc {
+      max-width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .preview-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .preview-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .preview-list li::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      flex-shrink: 0;
+    }
+
+    .preview-list li strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* Mini dashboard mockup */
+    .mockup {
+      background: rgba(10, 20, 40, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.4rem;
+    }
+
+    .mockup-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .mockup-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-left: auto;
+    }
+
+    .mockup-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .mockup-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      border-left: 2px solid var(--card-color, var(--cyan));
+    }
+
+    .mc-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .mc-val {
+      font-family: var(--display);
+      font-size: 1.7rem;
+      letter-spacing: 0.04em;
+      color: var(--card-color, var(--cyan));
+      line-height: 1.1;
+      margin: 4px 0 2px;
+    }
+
+    .mc-chip {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-family: var(--mono);
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: rgba(0, 229, 160, 0.12);
+      color: var(--green);
+    }
+
+    .mc-chip.warn {
+      background: rgba(255, 200, 64, 0.12);
+      color: var(--yellow);
+    }
+
+    .mc-chip.danger {
+      background: rgba(255, 61, 110, 0.12);
+      color: var(--red);
+    }
+
+    .mockup-risk {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .mr-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .mr-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    .mr-name {
+      font-size: 0.72rem;
+      font-weight: 500;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .mr-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mr-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--bar-color, var(--green));
+      transition: width 1s var(--ease);
+    }
+
+    /* ─────────────────────────────────────────
+   HOW IT WORKS
+───────────────────────────────────────── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent);
+      z-index: 0;
+    }
+
+    @media (max-width: 800px) {
+      .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps-grid::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .step {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .step-num {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1.2rem;
+      font-family: var(--display);
+      font-size: 1.4rem;
+      color: var(--cyan);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .step:hover .step-num {
+      background: rgba(0, 212, 255, 0.08);
+      border-color: var(--cyan);
+    }
+
+    .step-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .step-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─────────────────────────────────────────
+   RISK LEGEND
+───────────────────────────────────────── */
+    .legend-section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 2rem;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 640px) {
+      .legend-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .legend-card {
+      border-radius: 18px;
+      padding: 2rem;
+      border: 1px solid transparent;
+      transition: transform 0.3s var(--ease);
+    }
+
+    .legend-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .legend-card.green {
+      background: rgba(0, 229, 160, 0.05);
+      border-color: rgba(0, 229, 160, 0.2);
+    }
+
+    .legend-card.yellow {
+      background: rgba(255, 200, 64, 0.05);
+      border-color: rgba(255, 200, 64, 0.2);
+    }
+
+    .legend-card.red {
+      background: rgba(255, 61, 110, 0.05);
+      border-color: rgba(255, 61, 110, 0.2);
+    }
+
+    .legend-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .legend-title {
+      font-family: var(--display);
+      font-size: 1.8rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .legend-card.green .legend-title {
+      color: var(--green);
+    }
+
+    .legend-card.yellow .legend-title {
+      color: var(--yellow);
+    }
+
+    .legend-card.red .legend-title {
+      color: var(--red);
+    }
+
+    .legend-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .legend-thresholds {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .threshold-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────
+   CTA SECTION
+───────────────────────────────────────── */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 2rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .cta-glow {
+      position: absolute;
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(ellipse, rgba(0, 98, 255, 0.15), transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: blur(40px);
+    }
+
+    .cta-section .section-heading {
+      margin-bottom: 1.2rem;
+    }
+
+    .cta-section .section-desc {
+      margin-bottom: 2.5rem;
+    }
+
+    .cta-search {
+      display: flex;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(10, 20, 40, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .cta-search:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    }
+
+    .cta-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 14px 20px;
+      font-family: var(--body);
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+
+    .cta-input::placeholder {
+      color: var(--muted);
+    }
+
+    .cta-btn {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border: none;
+      color: #fff;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 12px 22px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .cta-btn:hover {
+      opacity: 0.88;
+    }
+
+    /* ─────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: var(--display);
+      font-size: 1.2rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .footer-brand em {
+      color: var(--cyan);
+      font-style: normal;
+    }
+
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--ink);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- BACKGROUND CANVAS -->
+  <canvas id="bgCanvas"></canvas>
+  <div class="grid-overlay"></div>
+
+  <!-- ── NAVBAR ── -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">🌍</div>
+      <span class="nav-wordmark">Climate<em>Risk</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#risk">Risk Levels</a></li>
+      <li><a href="#launch" class="nav-cta">Launch App →</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Live Climate Intelligence Platform
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">REAL-TIME</span>
+      <span class="line2">CLIMATE RISK</span>
+      <span class="line3">DASHBOARD</span>
+    </h1>
+    <p class="hero-sub">
+      Monitor <strong>temperature, humidity, AQI</strong>, and precipitation for any city on Earth.
+      Instant color-coded risk alerts — heatwave, flood, and pollution — powered by live open data.
+    </p>
+    <div class="hero-actions">
+      <a href="#launch" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        Analyze a City
+      </a>
+      <a href="#features" class="btn-ghost">
+        Explore Features
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </a>
+    </div>
+    <div class="scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── STATS STRIP ── -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-num">195+</span>
+      <span class="stat-label">Countries Covered</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">5</span>
+      <span class="stat-label">Risk Indicators</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">0</span>
+      <span class="stat-label">API Keys Needed</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">RT</span>
+      <span class="stat-label">Real-Time Data</span>
+    </div>
+  </div>
+
+  <!-- ── FEATURES ── -->
+  <section class="section" id="features">
+    <div class="section-label">// CAPABILITIES</div>
+    <h2 class="section-heading">WHAT WE TRACK</h2>
+    <p class="section-desc">Six precision indicators fused into a single risk score. Know before you go.</p>
+
+    <div class="features-grid">
+      <div class="feature-card large" style="--card-glow:#00d4ff; --icon-bg:rgba(0,212,255,0.1)">
+        <div>
+          <div class="feature-icon-wrap">🌡️</div>
+        </div>
+        <div>
+          <div class="feature-tag">Core Metric</div>
+          <div class="feature-title">Live Temperature &amp; Heatwave Detection</div>
+          <div class="feature-desc">Real-time temperature with apparent feel-like index. Heatwave risk activates at 30°C
+            and escalates to severe above 38°C — with animated alerts and color escalation.</div>
+        </div>
+      </div>
+
+      <div class="feature-card" style="--card-glow:#0062ff; --icon-bg:rgba(0,98,255,0.1)">
+        <div class="feature-icon-wrap">💧</div>
+        <div class="feature-tag">Hydrology</div>
+        <div class="feature-title">Flood Risk Monitoring</div>
+        <div class="feature-desc">Precipitation tracking mapped to flood probability bands. Low, moderate, and high
+          triggers.</div>
+      </div>
+
+      <div class="feature-card" style="--card-glow:#00e5a0; --icon-bg:rgba(0,229,160,0.1)">
+        <div class="feature-icon-wrap">🌫️</div>
+        <div class="feature-tag">Air Quality</div>
+        <div class="feature-title">AQI &amp; PM2.5 Index</div>
+        <div class="feature-desc">European AQI with PM2.5 µg/m³ readings. Pollution risk bands from Good to Hazardous.
+        </div>
+      </div>
+
+      <div class="feature-card" style="--card-glow:#ffc840; --icon-bg:rgba(255,200,64,0.1)">
+        <div class="feature-icon-wrap">💨</div>
+        <div class="feature-tag">Atmosphere</div>
+        <div class="feature-title">Wind &amp; Humidity Stress</div>
+        <div class="feature-desc">High humidity oppressiveness index alongside wind stress scoring — Calm → Strong →
+          Dangerous.</div>
+      </div>
+
+      <div class="feature-card" style="--card-glow:#ff3d6e; --icon-bg:rgba(255,61,110,0.1)">
+        <div class="feature-icon-wrap">🗺️</div>
+        <div class="feature-tag">Geospatial</div>
+        <div class="feature-title">Interactive Risk Map</div>
+        <div class="feature-desc">Leaflet.js powered map with city markers color-coded to overall risk level and live
+          popups.</div>
+      </div>
+
+      <div class="feature-card" style="--card-glow:#a855f7; --icon-bg:rgba(168,85,247,0.1)">
+        <div class="feature-icon-wrap">⚡</div>
+        <div class="feature-tag">Engine</div>
+        <div class="feature-title">Weighted Risk Score</div>
+        <div class="feature-desc">Five risk factors blended into a 0–100 composite score with a live animated gauge
+          readout.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PREVIEW ── -->
+  <section class="preview-section">
+    <div class="preview-inner">
+      <div class="preview-text">
+        <div class="section-label">// LIVE PREVIEW</div>
+        <h2 class="section-heading">DASHBOARD AT A GLANCE</h2>
+        <p class="section-desc">Every data point is fetched fresh and rendered into a clean, scannable interface.</p>
+        <ul class="preview-list">
+          <li><strong>Color-coded cards</strong> — instant visual triage</li>
+          <li><strong>Circular risk gauge</strong> — composite 0–100 score</li>
+          <li><strong>Risk breakdown bars</strong> — per-hazard detail</li>
+          <li><strong>Live map marker</strong> — city pinpoint with popup</li>
+          <li><strong>Alert banner</strong> — fires on any RED level</li>
+          <li><strong>One-click refresh</strong> — pull latest readings</li>
+        </ul>
+      </div>
+
+      <!-- Mockup -->
+      <div class="mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot" style="background:#ff3d6e"></div>
+          <div class="mockup-dot" style="background:#ffc840"></div>
+          <div class="mockup-dot" style="background:#00e5a0"></div>
+          <div class="mockup-title">Mumbai, India</div>
+        </div>
+        <div class="mockup-cards">
+          <div class="mockup-card" style="--card-color:#ff7b2f">
+            <div class="mc-label">Temperature</div>
+            <div class="mc-val">34.2°</div>
+            <span class="mc-chip warn">Moderate</span>
+          </div>
+          <div class="mockup-card" style="--card-color:#00d4ff">
+            <div class="mc-label">Humidity</div>
+            <div class="mc-val">78%</div>
+            <span class="mc-chip warn">High</span>
+          </div>
+          <div class="mockup-card" style="--card-color:#00e5a0">
+            <div class="mc-label">AQI</div>
+            <div class="mc-val">42</div>
+            <span class="mc-chip">Good</span>
+          </div>
+          <div class="mockup-card" style="--card-color:#ff3d6e">
+            <div class="mc-label">Precipitation</div>
+            <div class="mc-val">12mm</div>
+            <span class="mc-chip danger">High</span>
+          </div>
+        </div>
+        <div class="mockup-risk">
+          <div class="mr-label">// Risk Breakdown</div>
+          <div class="mr-row">
+            <div class="mr-name" style="font-size:0.72rem">🔥 Heatwave</div>
+            <div class="mr-track">
+              <div class="mr-fill" style="width:58%;--bar-color:#ffc840"></div>
+            </div>
+          </div>
+          <div class="mr-row">
+            <div class="mr-name" style="font-size:0.72rem">🌊 Flood</div>
+            <div class="mr-track">
+              <div class="mr-fill" style="width:80%;--bar-color:#ff3d6e"></div>
+            </div>
+          </div>
+          <div class="mr-row">
+            <div class="mr-name" style="font-size:0.72rem">🌫️ Pollution</div>
+            <div class="mr-track">
+              <div class="mr-fill" style="width:28%;--bar-color:#00e5a0"></div>
+            </div>
+          </div>
+          <div class="mr-row">
+            <div class="mr-name" style="font-size:0.72rem">💦 Humidity</div>
+            <div class="mr-track">
+              <div class="mr-fill" style="width:67%;--bar-color:#ffc840"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="section" id="how">
+    <div class="section-label">// PROCESS</div>
+    <h2 class="section-heading">HOW IT WORKS</h2>
+    <p class="section-desc">Four steps from city name to full climate risk briefing.</p>
+
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Enter City</div>
+        <div class="step-desc">Type any city name worldwide. Nominatim geocodes it to precise lat/lng coordinates.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Fetch Data</div>
+        <div class="step-desc">Open-Meteo weather and air quality APIs return live readings in parallel.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Calculate Risk</div>
+        <div class="step-desc">Threshold algorithms score each hazard; a weighted formula produces the composite index.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">View Report</div>
+        <div class="step-desc">Color-coded cards, gauge, risk bars, and map render instantly with alert banners.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RISK LEVELS ── -->
+  <section class="section" id="risk" style="padding-top:2rem">
+    <div class="section-label">// ALERT SYSTEM</div>
+    <h2 class="section-heading">RISK LEVELS</h2>
+    <p class="section-desc">Three-tier color system maps real-world thresholds to actionable alerts.</p>
+
+    <div class="legend-grid">
+      <div class="legend-card green">
+        <span class="legend-icon">🟢</span>
+        <div class="legend-title">LOW RISK</div>
+        <div class="legend-desc">Conditions are within safe, normal ranges. No immediate action required.</div>
+        <div class="legend-thresholds">
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--green)"></div>
+            Temp below 30°C
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--green)"></div>
+            AQI below 50
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--green)"></div>
+            Precip below 2mm
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--green)"></div>
+            Humidity below 60%
+          </div>
+        </div>
+      </div>
+
+      <div class="legend-card yellow">
+        <span class="legend-icon">🟡</span>
+        <div class="legend-title">MODERATE</div>
+        <div class="legend-desc">Elevated indicators. Stay informed and monitor local advisories.</div>
+        <div class="legend-thresholds">
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--yellow)"></div>
+            Temp 30–38°C
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--yellow)"></div>
+            AQI 50–150
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--yellow)"></div>
+            Precip 2–10mm
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--yellow)"></div>
+            Humidity 60–80%
+          </div>
+        </div>
+      </div>
+
+      <div class="legend-card red">
+        <span class="legend-icon">🔴</span>
+        <div class="legend-title">HIGH RISK</div>
+        <div class="legend-desc">Dangerous conditions. Take precautions and follow emergency guidance.</div>
+        <div class="legend-thresholds">
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--red)"></div>
+            Temp above 38°C
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--red)"></div>
+            AQI above 150
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--red)"></div>
+            Precip above 10mm
+          </div>
+          <div class="threshold-row">
+            <div class="threshold-dot" style="background:var(--red)"></div>
+            Humidity above 80%
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section" id="launch">
+    <div class="cta-glow"></div>
+    <div class="section-label">// GET STARTED</div>
+    <h2 class="section-heading">CHECK YOUR CITY NOW</h2>
+    <p class="section-desc">No sign-up. No API key. Just type a city and get instant climate risk intelligence.</p>
+    <div class="cta-search">
+      <input type="text" class="cta-input" id="ctaInput" placeholder="e.g. Tokyo, Lagos, Dubai…">
+      <button class="cta-btn" id="ctaBtn">Analyze →</button>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-brand">Climate<em>Risk</em></div>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#risk">Risk Levels</a></li>
+    </ul>
+    <div class="footer-copy">Powered by Open-Meteo · OpenStreetMap · No keys needed</div>
+  </footer>
+
+  <!-- ── BACKGROUND PARTICLES ── -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function rand(a, b) { return a + Math.random() * (b - a); }
+
+      function initParticles() {
+        particles = [];
+        const count = Math.floor(W / 12);
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: rand(0, W),
+            y: rand(0, H),
+            r: rand(0.4, 1.8),
+            vx: rand(-0.12, 0.12),
+            vy: rand(-0.08, 0.08),
+            alpha: rand(0.08, 0.35)
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (let p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(0,212,255,${p.alpha})`;
+          ctx.fill();
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = W;
+          if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H;
+          if (p.y > H) p.y = 0;
+        }
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      initParticles();
+      draw();
+      window.addEventListener('resize', () => { resize(); initParticles(); });
+    })();
+
+    // ── CTA redirect ──
+    document.getElementById('ctaBtn').addEventListener('click', () => {
+      const city = document.getElementById('ctaInput').value.trim();
+      if (city) {
+        // In a multi-page setup this would navigate to dashboard.html?city=...
+        // For demo: alert with the city
+        alert(`Launching dashboard for: ${city}\n\n(Link this button to your dashboard page with ?city=${encodeURIComponent(city)})`);
+      }
+    });
+
+    document.getElementById('ctaInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('ctaBtn').click();
+    });
+
+    // ── Intersection fade-in ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.feature-card, .step, .legend-card, .stat-item, .mockup').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+
+</html>
